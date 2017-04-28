@@ -1,0 +1,25 @@
+$ MASTER=local[4] SPARK_CLASSPATH=AlsApacheLogParser.jar ./bin/spark-shell
+
+
+import scala.collection.immutable.ListMap
+val p = new AccessLogParser
+val t1 = System.nanoTime
+val log = sc.textFile("access_log")
+val uris = log.map(line => p.parseRecordReturningNullObjectOnFailure(line).request)
+             .filter(request => request != "")
+             .map(request => request.split(" ")(1))  
+for {
+  line <- log
+  if p.parseRecord(line) == None
+} yield line
+val uriCount = log.map(p.parseRecordReturningNullObjectOnFailure(_).request)
+.filter(request => request != "")  
+.map(_.split(" ")(1))              
+.map(uri => (uri, 1))             
+.reduceByKey((a, b) => a + b)      // reduce to get this for each record:/java/java_oo/up.png,2)
+.collect    // convert to Array[(String, Int)], which is Array[(URI, numOccurrences)]
+val duration = (System.nanoTime - t1) / 1e9d
+val uriHitCount = ListMap(uriCount.toSeq.sortWith(_._2 > _._2):_*)
+uriHitCount.take(30).foreach(println)  
+uriduration.take(30).foreach(println) 
+spark.submit();

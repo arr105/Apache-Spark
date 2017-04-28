@@ -1,0 +1,36 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+
+case class WKey(userID: Int, artistID: Int, weight: Int) % creates key -value pairs
+val rawDataArray = sc.textFile(args(0)).map(line => line.split(","))
+  val keyedByData = rawDataArray.keyBy(arr => createKey(arr)) % creating key-value pairs using keyby function
+  def createKey(data: Array[String]): WKey = {
+    WKey(safeInt(data(US_ID)), safeInt(data(AR_ID)), safeInt(data(WE_GH)))
+  }
+  class ArtistPartitioner(partitions: Int) extends Partitioner {	%creating partitioner class and setting it with an id to run it 
+    require(partitions >= 0, s"Number of partitions ($partitions) cannot be negative.")
+
+    override def numPartitions: Int = partitions
+
+    override def getPartition(key: Any): Int = {
+      val k = key.asInstanceOf[WKey]
+      k.weight.hashCode() % numPartitions
+    }
+  }
+  object WKey {			%sorting the key, by creating companion object for flightkey and define implicit ordering
+    implicit def orderingByIdUserId[A <: WKey] : Ordering[A] = {
+       Ordering.by(fk => (fk.weight, fk.artistID * -1, fk.userID * -1))
+    }
+  }
+  object SecondarySort extends SparkJob { %partitioner and the sorting method is put together with RDD
+  def runSecondarySortExample(args: Array[String]): Unit = {
+    val sc = context("SecondarySorting")
+    val rawDataArray = sc.textFile(args(0)).map(line => line.split(","))
+	val keyedByData = rawDataArray.keyBy(arr => createKey(arr))
+    val keyedDataSorted = keyedByData.repartitionAndSortWithinPartitions(new ArtistPartitioner(1))
+    keyedDataSorted.collect().foreach(println)
+  }
+}
+
+

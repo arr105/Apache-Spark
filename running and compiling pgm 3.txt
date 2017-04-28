@@ -1,0 +1,23 @@
+//Runnig the application
+
+$wget --no-check-certificate .../access_log.txt
+$ hdfs dfs -put access_log.txt
+
+//viewing sample data
+
+uriCounts.take(10).foreach(println)
+
+//writing outputs to file
+
+// this creates a directory named UriHitCount, with files in it like part-00000 and part-00001
+uriHitCount.saveAsTextFile("UriHitCount")
+
+
+//computing execution times in Cached RDD
+
+val t1 = System.nanoTime
+
+// code
+
+val duration = (System.nanoTime - t1) / 1e9d
+

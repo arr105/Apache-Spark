@@ -1,0 +1,56 @@
+//prerequites for running scala
+//scala plug-ins are included
+<plugin>
+  <groupId>org.scala-tools</groupId>
+      <xrefrtifactId>maven-scala-plugin</artifactId>
+      <executions>
+        <execution>
+          <goals>
+            <goal>compile</goal>
+            <goal>testCompile</goal>
+          </goals>
+        </execution>
+      </executions>
+</plugin>
+
+//scala plug-in repositories are updated
+
+<pluginRepositories>
+<pluginRepository>
+    <id>scala-tools.org</id>
+    <name>Scala-tools Maven2 Repository</name>
+    <url>http://scala-tools.org/repo-releases</url>
+  </pluginRepository>
+</pluginRepositories>
+
+//scala and spark dependencies are updated
+
+
+<dependencies>
+  <dependency>
+    <groupId>org.scala-lang</groupId>
+    <xrefrtifactId>scala-library</artifactId>
+    <version>2.10.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.spark</groupId>
+    <xrefrtifactId>spark-core_2.10</artifactId>
+    <version>1.6.0-cdh5.7.0</version>
+    <scope>provided</scope>
+  </dependency>
+</dependencies>
+
+//generate application jar
+
+$mvn package
+
+//Runnig the application
+
+$wget --no-check-certificate .../user_artists.txt
+$ hdfs dfs -put user_artists.txt
+
+$ spark-submit --class com.cloudera.WKey.WKey \
+--master local --deploy-mode client --executor-memory 1g \
+--name wordcount --conf "spark.app.id=wordcount" \
+WKey-1.0-SNAPSHOT-jar-with-dependencies.jar hdfs://namenode_host:8020/C:\Users\aswat\Desktop\Cloud Project 2\Spark_Pgm_2.txt 2
